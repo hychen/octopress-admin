@@ -6,15 +6,14 @@ import argparse
 import os
 import ucltip
 
-def inblogdir():
-    return os.path.isfile('_config.yml')
+def inblogdir(root='.'):
+    return os.path.isfile(os.path.join(root, '_config.yml'))
 
 ucltip.regcmds('git', cls=ucltip.CmdDispatcher)
 try:
     ucltip.regcmds('rake', 'bundle', 'sensible-editor')
 except ucltip.CommandNotFound, e:
-    if not inblogdir():
-        print e
+    pass
 
 class Management(object):
 
@@ -54,10 +53,22 @@ class Management(object):
 class Console(Management):
 
     def prepare(self):
-        self.branchs = filter(lambda e: e.startswith('drafts/'), \
-                         map(str.strip, git.branch().split('\n')))
+        if inblogdir():
+            self.branchs = filter(lambda e: e.startswith('drafts/'), \
+                         map(str.strip, git.branch().split('\n'))) or []
 
-        self.blogdir = inblogdir() and os.path.abspath(os.path.curdir) or None
+            self.blogdir = os.path.abspath(os.path.curdir) or None
+
+    # General commands
+    # ------------------
+    def doforeach(self, args):
+        """run command in each sub octopress directories in current directories
+        """
+        for _dir in filter(lambda e: inblogdir(e), os.listdir('.')):
+            os.system('cd {} && {}'.format(_dir, args.cmd))
+
+    def _setargsforeach(self):
+        self.parser_foreach.add_argument('cmd', help='command string')
 
     # Blog site commands
     # ------------------
@@ -99,7 +110,8 @@ class Console(Management):
         for index, branch_name in enumerate(self.branchs, start=1):
             filename = self._find_mod_filename(branch_name)
             lines.append("[{}] {} (branch: {})".format(index, filename, branch_name))
-        self.info('\n'.join(lines))
+        if lines:
+            self.info('\n'.join(lines))
 
     def dopage(self, args):
         """create a new page"""
