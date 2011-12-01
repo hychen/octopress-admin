@@ -73,14 +73,14 @@ class Console(Management):
         self.update_octopress()
         self.deploy()
 
-    def doupdate_octopress(self):
+    def doupdate_octopress(self, args):
         """update octopress source"""
         git.pull('octopress', 'master')
         bundle('install')
         rake('update_source')
         rake('update_style')
 
-    def dodeploy(self):
+    def dodeploy(self, args):
         """deploy content to remote server"""
         git.checkout('source')
         git.push('origin', 'source')
