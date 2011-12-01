@@ -1,0 +1,194 @@
+#!/usr/bin/env python
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+# -*- encoding=utf8 -*-
+# Author 2011 Hsin-Yi Chen
+import argparse
+import os
+import ucltip
+
+def inblogdir():
+    return os.path.isfile('_config.yml')
+
+ucltip.regcmds('git', cls=ucltip.CmdDispatcher)
+try:
+    ucltip.regcmds('rake', 'bundle', 'sensible-editor')
+except ucltip.CommandNotFound, e:
+    if not inblogdir():
+        print e
+
+class Management(object):
+
+    def __init__(self):
+        self.parser = argparse.ArgumentParser()
+        self._initsubcommands()
+
+    def _initsubcommands(self):
+        self.subparsers = self.parser.add_subparsers(title='subcommands',
+                                    help='additional help')
+        for attr in dir(self):
+            if not attr.startswith('do'):
+                continue
+            _attr = attr[2:]
+            try:
+                _help = getattr(self, attr).__doc__
+                _help = _help and _help.split('\n')[0] or None
+            except IndexError:
+                _help = None
+            subcmd = _attr.lower()
+            subparser = self.subparsers.add_parser(subcmd, help=_help)
+            subparser.set_defaults(func=getattr(self,attr))
+            setattr(self, "parser_{}".format(subcmd), subparser)
+            # setup arg of parser
+            try:
+                fn = getattr(self, "_setargs{}".format(_attr))
+                if callable(fn):    fn()
+            except AttributeError:
+                pass
+
+    def run(self, args):
+        if not args:
+            args = ['-h']
+        args = self.parser.parse_args(args)
+        args.func(args)
+
+class Console(Management):
+
+    def prepare(self):
+        self.branchs = filter(lambda e: e.startswith('drafts/'), \
+                         map(str.strip, git.branch().split('\n')))
+
+        self.blogdir = inblogdir() and os.path.abspath(os.path.curdir) or None
+
+    # Blog site commands
+    # ------------------
+    def donew(self, args):
+        """create a new blog site"""
+        git.clone('git://github.com/imathis/octopress.git', args.blogname)
+
+    def _setargsnew(self):
+        self.parser_new.add_argument('blogname', help='Blog name')
+
+    def doupgrade(self, args):
+        """upgrade blog"""
+        self.update_octopress()
+        self.deploy()
+
+    def doupdate_octopress(self):
+        """update octopress source"""
+        git.pull('octopress', 'master')
+        bundle('install')
+        rake('update_source')
+        rake('update_style')
+
+    def dodeploy(self):
+        """deploy content to remote server"""
+        git.checkout('source')
+        git.push('origin', 'source')
+        rake('generate')
+        rake('deploy')
+
+    def dopreview(self):
+        """start a server to preview blog"""
+        rake('preview')
+
+    # Post/Page Commands
+    # ------------------
+    def dodrafts(self, args):
+        """list draft posts"""
+        lines=[]
+        for index, branch_name in enumerate(self.branchs, start=1):
+            filename = self._find_mod_filename(branch_name)
+            lines.append("[{}] {} (branch: {})".format(index, filename, branch_name))
+        self.info('\n'.join(lines))
+
+    def dopage(self, args):
+        """create a new page"""
+        self._new_item('page', args.title)
+
+    def _setargspage(self):
+        self.parser_page.add_argument('title', help='page title')
+
+    def dopost(self, args):
+        """create a new post"""
+        filename = self._new_item('post', args.title)
+        draft_branch="drafts/{}".format(filename).replace('markdown','')
+        git.checkout('source', b=draft_branch)
+        git.add('.')
+        msg="start to write {}".format(args.title)
+        git.commit(m=msg)
+
+    def _setargspost(self):
+        self.parser_post.add_argument('title', help='post title')
+
+    def _new_item(self, item_name, title):
+        ret=rake('new_{}["{}"]'.format(item_name, title))
+        if not ret:
+            exit()
+        filename  = ret.replace('\n','').split(':')[1].strip()
+        sensible_editor(os.path.join(self.blogdir, filename))
+        return filename
+
+    def doedit(self, args):
+        """edit draft post"""
+        draft_branch = self.draft_branchs(args.index-1)
+        old_branch = self.current_branch()
+        #@FIXME: stash untracked files?
+        # git.stash()
+        # get drafts source
+        git.checkout(draft_branch)
+        filename = self._find_mod_filename(draft_branch)
+        sensible_editor(os.path.join(self.blogdir, filename), via_shell=True)
+        # get original source
+        git.checkout(old_branch)
+        #@FIXME: apply stashed files?
+        #git.stash('apply')
+
+    def _setargsedit(self):
+        self.parser_edit.add_argument('index', type=int, help='draft post index')
+
+    def dopublish(self, args):
+        """let draft post is avaliable to publish"""
+        old_branch = self.cureent_branch()
+        draft_branch = self.draft_branch(args.index)
+        git.merge('source', draft_branch, no_ff=True)
+#        git.branch(draft_branch, D=True)
+        git.checkout(old_branch)
+
+    def _setargspublish(self):
+        self.parser_publish.add_argument('index', type=int, help='draft post index')
+
+    # Utils functions
+    # ---------------
+    def draft_branchs(self, index=None):
+        if index is None:
+            return self.branchs
+        try:
+            return self.branchs[index-1]
+        except IndexError:
+            self.die('draft post not found')
+
+    def current_branch(self):
+        for b in git.branch().split('\n'):
+            if '*' in b:
+                return b.replace('* ','')
+
+    def _find_mod_filename(self, branch):
+        output = git.diff(branch+'^', branch, name_only=True)
+        return output.replace('\n','')
+
+    def die(self, msg):
+        self.err(msg)
+        exit()
+
+    def err(self, msg):
+        print 'Error:'+msg
+
+    def info(self, msg):
+        print msg
+
+if __name__ == '__main__':
+    import sys
+    c=Console()
+    c.prepare()
+    c.current_branch()
+    c.run(sys.argv[1:])
