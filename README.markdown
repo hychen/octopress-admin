@@ -10,9 +10,13 @@ hychen's octopress admin script
 
 # Installation
 
-## get source
+## install dependecy for Ubuntu/Debian users
 
 	user@host:~$ apt-get install git
+	user@host:~$ apt-get install python-ucltip
+
+## get source
+
 	user@host:~$ git clone http://github.com/hychen/octopress-admin
 
 ## install script
