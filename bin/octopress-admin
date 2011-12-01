@@ -87,9 +87,9 @@ class Console(Management):
         rake('generate')
         rake('deploy')
 
-    def dopreview(self):
+    def dopreview(self, args):
         """start a server to preview blog"""
-        rake('preview')
+        rake('preview', via_shell=True)
 
     # Post/Page Commands
     # ------------------
