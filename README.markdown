@@ -34,20 +34,22 @@ or just create a link
 
 # USAGE
 
-	usage: blog [-h]
+	usage: octopress-admin [-h]
 
-	            {deploy,drafts,edit,new,page,post,preview,publish,update_octopress,upgrade}
+	            {deploy,drafts,edit,foreach,new,page,post,preview,publish,update_octopress,upgrade}
 	            ...
 
 	optional arguments:
 	  -h, --help            show this help message and exit
 
 	subcommands:
-	  {deploy,drafts,edit,new,page,post,preview,publish,update_octopress,upgrade}
+	  {deploy,drafts,edit,foreach,new,page,post,preview,publish,update_octopress,upgrade}
 	                        additional help
 	    deploy              deploy content to remote server
 	    drafts              list draft posts
 	    edit                edit draft post
+	    foreach             run command in each sub octopress directories in
+	                        current directories
 	    new                 create a new blog site
 	    page                create a new page
 	    post                create a new post
