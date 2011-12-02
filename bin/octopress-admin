@@ -54,8 +54,10 @@ class Console(Management):
 
     def prepare(self):
         if inblogdir():
+            def _ch(e):
+                return e.strip().replace('* ','')
             self.branchs = filter(lambda e: e.startswith('drafts/'), \
-                         map(str.strip, git.branch().split('\n'))) or []
+                         map(_ch, git.branch().split('\n')))
 
             self.blogdir = os.path.abspath(os.path.curdir) or None
 
@@ -73,13 +75,18 @@ class Console(Management):
     # Blog site commands
     # ------------------
     def donew(self, args):
-        """create a new blog site"""
-        git.clone('git://github.com/imathis/octopress.git', args.blogname)
-        bundle('install')
-        rake('install')
+        """create a new blog site (only for hosting in github)"""
+        newblogdir = args.blogname
+        git.clone('git://github.com/imathis/octopress.git', newblogdir)
 
     def _setargsnew(self):
         self.parser_new.add_argument('blogname', help='Blog name')
+
+    def doinit(self, args):
+        """init blog setup"""
+        self.update_bundle()
+        rake('install', via_shell=True)
+        rake('setup_github_pages', via_shell=True)
 
     def doupgrade(self, args):
         """upgrade blog"""
@@ -90,9 +97,13 @@ class Console(Management):
         """update octopress source"""
         git.checkout('source')
         git.pull('octopress', 'master')
-        bundle('install')
-        rake('update_source')
-        rake('update_style')
+        self.doupdate_bundle()
+        rake('update_source', via_shell=True)
+        rake('update_style', via_shell=True)
+
+    def doupdate_bundle(self, args):
+        bundle('update', via_shell=True)
+        bundle('install', via_shell=True)
 
     def dodeploy(self, args):
         """deploy content to remote server"""
@@ -125,10 +136,10 @@ class Console(Management):
 
     def dopost(self, args):
         """create a new post"""
-        filename = self._new_item('post', args.title)
-        draft_branch="drafts/{}".format(filename).replace('markdown','')
+        filename = os.path.basename(self._new_item('post', args.title))
+        draft_branch="drafts/{}".format(filename).replace('.markdown','')
         git.checkout('source', b=draft_branch)
-        git.add('.')
+        git.add(filename)
         msg="start to write {}".format(args.title)
         git.commit(m=msg)
 
@@ -146,17 +157,9 @@ class Console(Management):
     def doedit(self, args):
         """edit draft post"""
         draft_branch = self.draft_branchs(args.index-1)
-        old_branch = self.current_branch()
-        #@FIXME: stash untracked files?
-        # git.stash()
-        # get drafts source
         git.checkout(draft_branch)
         filename = self._find_mod_filename(draft_branch)
         sensible_editor(os.path.join(self.blogdir, filename), via_shell=True)
-        # get original source
-        git.checkout(old_branch)
-        #@FIXME: apply stashed files?
-        #git.stash('apply')
 
     def _setargsedit(self):
         self.parser_edit.add_argument('index', type=int, help='draft post index')
