@@ -75,6 +75,8 @@ class Console(Management):
     def donew(self, args):
         """create a new blog site"""
         git.clone('git://github.com/imathis/octopress.git', args.blogname)
+        bundle('install')
+        rake('install')
 
     def _setargsnew(self):
         self.parser_new.add_argument('blogname', help='Blog name')
@@ -137,7 +139,7 @@ class Console(Management):
         if not ret:
             exit()
         filename  = ret.replace('\n','').split(':')[1].strip()
-        sensible_editor(os.path.join(self.blogdir, filename))
+        sensible_editor(os.path.join(self.blogdir, filename), via_shell=True)
         return filename
 
     def doedit(self, args):
