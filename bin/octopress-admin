@@ -139,7 +139,7 @@ class Console(Management):
         filename = os.path.basename(self._new_item('post', args.title))
         draft_branch="drafts/{}".format(filename).replace('.markdown','')
         git.checkout('source', b=draft_branch)
-        git.add(filename)
+        git.add(os.path.join(self.blogdir, 'source', '_posts', filename)
         msg="start to write {}".format(args.title)
         git.commit(m=msg)
 
