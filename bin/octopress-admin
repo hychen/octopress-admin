@@ -83,11 +83,12 @@ class Console(Management):
 
     def doupgrade(self, args):
         """upgrade blog"""
-        self.update_octopress()
-        self.deploy()
+        self.doupdate_octopress()
+        self.dodeploy()
 
     def doupdate_octopress(self, args):
         """update octopress source"""
+        git.checkout('source')
         git.pull('octopress', 'master')
         bundle('install')
         rake('update_source')
