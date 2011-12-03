@@ -53,6 +53,7 @@ class Management(object):
 class Console(Management):
 
     def prepare(self):
+        self.execname = os.path.basename(__file__)
         if inblogdir():
             def _ch(e):
                 return e.strip().replace('* ','')
@@ -76,24 +77,34 @@ class Console(Management):
     # ------------------
     def donew(self, args):
         """create a new blog site (only for hosting in github)"""
+        self.info('Getting octopress source')
         newblogdir = args.blogname
         git.clone('git://github.com/imathis/octopress.git', newblogdir)
+        msg = '\n'.join(['Cloned octopress source code in {}'.format(newblogdir),
+                  'please do the following commands for initialize',
+                  'cd {}'.format(newblogdir),
+                  '{} init'.format(self.execname)
+                    ])
+        self.info(msg)
 
     def _setargsnew(self):
         self.parser_new.add_argument('blogname', help='Blog name')
 
     def doinit(self, args):
         """init blog setup"""
-        self.update_bundle()
+        self.info('setting github deploy configuration')
+        self.doupdate_bundle()
         rake('install', via_shell=True)
         rake('setup_github_pages', via_shell=True)
 
-    def doupgrade(self, args):
+    def doupgrade(self, args=None):
         """upgrade blog"""
         self.doupdate_octopress()
-        self.dodeploy()
+        msg = ['octopress source updated!',
+               'please run {} deploy to update change in your blog'.format(self.execname)]
+        self.info(msg)
 
-    def doupdate_octopress(self, args):
+    def doupdate_octopress(self, args=None):
         """update octopress source"""
         git.checkout('source')
         git.pull('octopress', 'master')
@@ -101,7 +112,7 @@ class Console(Management):
         rake('update_source', via_shell=True)
         rake('update_style', via_shell=True)
 
-    def doupdate_bundle(self, args):
+    def doupdate_bundle(self, args=None):
         bundle('update', via_shell=True)
         bundle('install', via_shell=True)
 
@@ -109,8 +120,8 @@ class Console(Management):
         """deploy content to remote server"""
         git.checkout('source')
         git.push('origin', 'source')
-        rake('generate')
-        rake('deploy')
+        rake('generate', via_shell=True)
+        rake('deploy', via_shell=True)
 
     def dopreview(self, args):
         """start a server to preview blog"""
@@ -160,17 +171,20 @@ class Console(Management):
         git.checkout(draft_branch)
         filename = self._find_mod_filename(draft_branch)
         sensible_editor(os.path.join(self.blogdir, filename), via_shell=True)
+        self.info('remeber commit changes, if you want to stop writting!')
 
     def _setargsedit(self):
         self.parser_edit.add_argument('index', type=int, help='draft post index')
 
     def dopublish(self, args):
-        """let draft post is avaliable to publish"""
-        old_branch = self.cureent_branch()
-        draft_branch = self.draft_branch(args.index)
-        git.merge('source', draft_branch, no_ff=True)
-#        git.branch(draft_branch, D=True)
-        git.checkout(old_branch)
+        """let draft post is avaliable to publish and draft branch will be removed"""
+        draft_branch = self.draft_branchs(args.index)
+        git.checkout('source')
+        git.merge(draft_branch, no_ff=True, via_shell=True)
+        git.branch(draft_branch, D=True)
+        msg = ['You are current in source branch, {} is publishable now',
+               'the post will also include in your blog after next deploy']
+        self.info(msg)
 
     def _setargspublish(self):
         self.parser_publish.add_argument('index', type=int, help='draft post index')
