@@ -59,20 +59,42 @@ create a new post and commit in a git branch, every draft post is
 mapping to a git branch name starts with a drafts prefix
 
 	$ octopress-admin post 'this is a new post'
+	---
+	layout: post
+	title: ""hello""
+	date: 2011-12-04 05:15
+	comments: true
+	categories:
+	---
+
+here is how log look likes
+
+	2011-12-04 Hsin-Yi Chen (hyc~ o [source] enable facebook like
+	2011-12-04 Hsin-Yi Chen (hyc~ │ o [drafts/2011-12-04-hiello] start to write hiello
+	2011-12-04 Hsin-Yi Chen (hyc~ I─┘ Finished github deploy settings
 
 ### list draft posts you have
 
 list posts in drafts/* branchs
 
 	$ octopress-admin drafts
+	[1] source/_posts/2011-12-04-hello.markdown (branch: drafts/2011-12-04-hello)
 
 ### edit a draft post
 
 checkout to a draft branch and use user favor editor to modify the draft post
 
 	$ octopress-admin edit 1
+	---
+	layout: post
+	title: ""hello""
+	date: 2011-12-04 05:15
+	comments: true
+	categories:
+	---
 
-1 is a number as a index of draft branchs
+1 is a number as a index of draft branchs, it is recommand to use
+`octopress-admin drafts` to know the index of drafts now, because branch index is not always the same.
 
 ### publish a draft post
 
@@ -82,6 +104,13 @@ the draft post will be include in next blog site building
 	$ octopress-admin publish 1
 
 1 is a number as a index of draft branchs
+
+here is the commit log after publish the draft
+
+	2011-12-04 Hsin-Yi Chen (hyc~ M─┐ [source] Merge branch 'drafts/2011-12-04-hello' into source
+	2011-12-04 Hsin-Yi Chen (hyc~ │ o start to write hello
+	2011-12-04 Hsin-Yi Chen (hyc~ o │ enable facebook like
+	2011-12-04 Hsin-Yi Chen (hyc~ o─┘ Finished github deploy settings
 
 ### deploy blog
 
