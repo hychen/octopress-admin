@@ -86,6 +86,7 @@ class Console(Management):
                   '{} init'.format(self.execname)
                     ])
         self.info(msg)
+        self.doinit()
 
     def _setargsnew(self):
         self.parser_new.add_argument('blogname', help='Blog name')

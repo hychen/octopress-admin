@@ -57,3 +57,9 @@ or just create a link
 	    publish             let draft post is avaliable to publish
 	    update_octopress    update octopress source
 	    upgrade             upgrade blog
+
+### create a new blog
+
+cloned octopress source.
+
+	$ octopress-admin new hyblog
