@@ -96,6 +96,9 @@ class Console(Management):
         self.doupdate_bundle()
         rake('install', via_shell=True)
         rake('setup_github_pages', via_shell=True)
+        git.add('.')
+        git.commit(m='Finished github deploy settings')
+        self.info('setup deploy hosting:github')
 
     def doupgrade(self, args=None):
         """upgrade blog"""

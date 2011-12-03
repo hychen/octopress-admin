@@ -38,7 +38,16 @@ before using this tool, please setup your ruby enviroment for octopress
 
 ### create a new blog
 
-cloned octopress source, setup for deploy to github
+### create a new blog site
+
+cloned octopress source
+
+	$ octopress-admin new hyblog
+
+
+### install bundle, do setup of github
+
+setup for deploy to github
 
 note: a user gh_page repository in github link is required
 
