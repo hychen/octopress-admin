@@ -6,7 +6,7 @@ hychen's octopress admin script
 - git
 - sensible-editor
 - python modules:
-	- [UCLTIP](pypi.python.org/pypi/ucltip)
+	- [UCLTIP](pypi.python.org/pypi/ucltip) (>= 0.6)
 
 # Installation
 
@@ -35,8 +35,6 @@ or just create a link
 ## How to use it
 
 before using this tool, please setup your ruby enviroment for octopress
-
-### create a new blog
 
 ### create a new blog site
 
