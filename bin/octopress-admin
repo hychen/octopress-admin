@@ -76,7 +76,7 @@ class Console(Management):
     # Blog site commands
     # ------------------
     def donew(self, args):
-        """create a new blog site (only for hosting in github)"""
+        """create a new blog site"""
         self.info('Getting octopress source')
         newblogdir = args.blogname
         git.clone('git://github.com/imathis/octopress.git', newblogdir)
@@ -91,7 +91,7 @@ class Console(Management):
         self.parser_new.add_argument('blogname', help='Blog name')
 
     def doinit(self, args=None):
-        """init blog setup"""
+        """init blog setup (only for github deploy method"""
         self.info('setting github deploy configuration')
         self.doupdate_bundle()
         rake('install', via_shell=True)
@@ -116,6 +116,7 @@ class Console(Management):
         rake('update_style', via_shell=True)
 
     def doupdate_bundle(self, args=None):
+        """update and install ruby bundle"""
         bundle('update', via_shell=True)
         bundle('install', via_shell=True)
 
