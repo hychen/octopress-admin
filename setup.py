@@ -14,7 +14,7 @@ setup(
     author_email = 'ossug.hychen@gmail.com',
     url='http://github.com/hychen/octopress-admin',
     license = 'BSD-2-clause License',
-    packages=['octopress-admin'],
+    scripts=['bin/octopress-admin'],
     classifiers = [
       "Development Status :: 3 - Alpha",
       "Intended Audience :: Developers",
