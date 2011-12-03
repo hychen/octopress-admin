@@ -105,7 +105,7 @@ class Console(Management):
         self.doupdate_octopress()
         msg = ['octopress source updated!',
                'please run {} deploy to update change in your blog'.format(self.execname)]
-        self.info(msg)
+        self.info('\n'.join(msg))
 
     def doupdate_octopress(self, args=None):
         """update octopress source"""
@@ -149,7 +149,7 @@ class Console(Management):
         self.parser_page.add_argument('title', help='page title')
 
     def dopost(self, args):
-        """create a new post"""
+        """create a new post as a draft"""
         filename = os.path.basename(self._new_item('post', args.title))
         draft_branch="drafts/{}".format(filename).replace('.markdown','')
         git.checkout('source', b=draft_branch)
