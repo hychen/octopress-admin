@@ -86,12 +86,11 @@ class Console(Management):
                   '{} init'.format(self.execname)
                     ])
         self.info(msg)
-        self.doinit()
 
     def _setargsnew(self):
         self.parser_new.add_argument('blogname', help='Blog name')
 
-    def doinit(self, args):
+    def doinit(self, args=None):
         """init blog setup"""
         self.info('setting github deploy configuration')
         self.doupdate_bundle()
