@@ -8,11 +8,7 @@ setup(
     name = 'octopress-admin',
     version = open('VERSION.txt').read().strip(),
     description = 'octopress blog management script',
-    long_description="""
-This library makes you to use command line tool in Python by OO way.
-The concept is to transform 1) command as a instance, 2) options
-of command as arguments and keyword arguments of function or
-instance method when method be used as a sub command of a command.
+    long_description="""Octopress is a framework designed by Brandon Mathis for Jekyll, the blog aware static site generator powering Github Pages. This tool provides enhancement of Octopress management such as creat a post as draft, create or upgrad Octopress bog site.
 """,
     author = 'Hsin-Yi Chen 陳信屹 (hychen)',
     author_email = 'ossug.hychen@gmail.com',
