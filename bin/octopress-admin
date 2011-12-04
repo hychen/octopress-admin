@@ -188,7 +188,7 @@ class Console(Management):
         git.branch(draft_branch, D=True)
         msg = ['You are current in source branch, {} is publishable now',
                'the post will also include in your blog after next deploy']
-        self.info(msg)
+        self.info('\n'.join(msg))
 
     def _setargspublish(self):
         self.parser_publish.add_argument('index', type=int, help='draft post index')
