@@ -9,7 +9,7 @@ import ucltip
 def inblogdir(root='.'):
     return os.path.isfile(os.path.join(root, '_config.yml'))
 
-ucltip.regcmds('git', cls=ucltip.CmdDispatcher)
+ucltip.regcmds('git', 'gem', cls=ucltip.CmdDispatcher)
 try:
     ucltip.regcmds('rake', 'bundle', 'sensible-editor')
 except ucltip.CommandNotFound, e:
@@ -93,6 +93,7 @@ class Console(Management):
     def doinit(self, args=None):
         """init blog setup (only for github deploy method"""
         self.info('setting github deploy configuration')
+        gem.install('bundler')
         self.doupdate_bundle()
         rake('install', via_shell=True)
         rake('setup_github_pages', via_shell=True)
