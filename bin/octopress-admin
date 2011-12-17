@@ -9,7 +9,10 @@ import ucltip
 def inblogdir(root='.'):
     return os.path.isfile(os.path.join(root, '_config.yml'))
 
-ucltip.regcmds('git', 'gem', cls=ucltip.CmdDispatcher)
+try:
+    ucltip.regcmds('git', 'gem', cls=ucltip.CmdDispatcher)
+except ucltip.CommandNotFound, e:
+    pass
 try:
     ucltip.regcmds('rake', 'bundle', 'sensible-editor')
 except ucltip.CommandNotFound, e:
@@ -173,6 +176,7 @@ class Console(Management):
     def doedit(self, args):
         """edit draft post"""
         draft_branch = self.draft_branchs(args.index-1)
+        print draft_branch
         git.checkout(draft_branch)
         filename = self._find_mod_filename(draft_branch)
         sensible_editor(os.path.join(self.blogdir, filename), via_shell=True)
@@ -183,7 +187,7 @@ class Console(Management):
 
     def dopublish(self, args):
         """let draft post is avaliable to publish and draft branch will be removed"""
-        draft_branch = self.draft_branchs(args.index)
+        draft_branch = self.draft_branchs(args.index-1)
         git.checkout('source')
         git.merge(draft_branch, no_ff=True, via_shell=True)
         git.branch(draft_branch, D=True)
@@ -200,7 +204,7 @@ class Console(Management):
         if index is None:
             return self.branchs
         try:
-            return self.branchs[index-1]
+            return self.branchs[index]
         except IndexError:
             self.die('draft post not found')
 
