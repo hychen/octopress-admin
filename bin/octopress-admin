@@ -214,16 +214,18 @@ class Console(Management):
                 return b.replace('* ','')
 
     def _find_mod_filename(self, branch):
-        output = git.diff(branch+'^', branch, name_only=True)
+        output = git.diff(branch+'^{/starts*}', branch, name_only=True)
         if not output:
-            self.die('can not find post in branch {}'.format(branch))
+            output = git.diff(branch+'^', branch, name_only=True)
+            if not output:
+                self.die('can not find post in branch {}'.format(branch))
 
         blobs = output.split('\n')
-        if blobs:
-            try:
-                return filter(lambda e : '.markdown' in e, blobs)[0]
-            except IndexError:
-                self.die('branch {} has more than 1 markdown file'.format(branch))
+        posts = filter(lambda e : e.endswith('.markdown'), blobs)
+        if len(posts) > 1:
+            self.die('branch {} has more than 1 markdown file'.format(branch))
+        else:
+            return posts[0]
 
     def die(self, msg):
         self.err(msg)
